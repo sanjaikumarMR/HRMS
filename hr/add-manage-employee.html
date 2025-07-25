@@ -143,7 +143,7 @@ function addEmployee() {
     password: document.getElementById('password').value
   };
 
-  fetch("http://localhost:8080/api/users", {
+  fetch("https://hrms-backend-2wks.onrender.com/api/users", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(employee)
@@ -158,7 +158,7 @@ function addEmployee() {
 
 
     function fetchEmployees() {
-      fetch("http://localhost:8080/api/users/employees")
+      fetch("https://hrms-backend-2wks.onrender.com/api/users/employees")
         .then(res => res.json())
         .then(data => {
           const table = document.getElementById("employeeTable");
@@ -188,7 +188,7 @@ function openEmployeeManager(userId, currentRole = '', managerId = '') {
   document.getElementById("editManagerId").value = managerId || "";
 
   // Fetch full user details
-  fetch(`http://localhost:8080/api/users/${userId}`)
+  fetch(`https://hrms-backend-2wks.onrender.com/api/users/${userId}`)
     .then(res => res.json())
     .then(user => {
       // Show Assign RM tab only if RM
@@ -232,7 +232,7 @@ function submitEdit(event) {
     role: document.getElementById("editRole").value
   };
 
-  fetch(`http://localhost:8080/api/users/${userId}`, {
+  fetch(`https://hrms-backend-2wks.onrender.com/api/users/${userId}`, {
     method: "PATCH",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(updatedData)
@@ -250,7 +250,7 @@ function submitManagerAssign() {
   const userId = document.getElementById("editUserId").value;
   const managerId = document.getElementById("editManagerId").value;
 
-  fetch(`http://localhost:8080/api/users/${userId}`, {
+  fetch(`https://hrms-backend-2wks.onrender.com/api/users/${userId}`, {
     method: "PATCH",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ managerId })
