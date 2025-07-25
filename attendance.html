@@ -69,7 +69,7 @@
       if (!captured) return resultBox.innerText = "❌ Face not detected";
 
       try {
-        const refRes = await fetch(`http://localhost:8080/api/face/${userId}`);
+        const refRes = await fetch(`https://hrms-backend-2wks.onrender.com/api/face/${userId}`);
         const refData = await refRes.json();
         const refDescriptor = new Float32Array(Object.values(refData));
         const distance = faceapi.euclideanDistance(captured.descriptor, refDescriptor);
@@ -89,7 +89,7 @@
   }
 
   function markAttendance(userId, lat, lng) {
-    fetch('http://localhost:8080/api/attendance', {
+    fetch('https://hrms-backend-2wks.onrender.com/api/attendance', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
