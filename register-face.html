@@ -73,7 +73,7 @@
       const descriptor = Array.from(detection.descriptor); // Float32Array to JSON
 
       // Send to backend
-      fetch('http://localhost:8080/api/face/register', {
+      fetch('https://hrms-backend-2wks.onrender.com/api/face/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ userId, descriptor })
