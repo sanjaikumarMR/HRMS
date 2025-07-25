@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Add & Manage Employees</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; }
+    input, select, button { margin: 5px 0; padding: 8px; width: 100%; }
+    table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+    th, td { padding: 10px; border: 1px solid #ccc; text-align: left; }
+    th { background-color: #f2f2f2; }
+    h2 { text-align: center; }
+
+    /* Modal styling */
+    #editModal {
+      display: none; position: fixed; top: 15%; left: 30%; width: 40%;
+      background: white; padding: 20px;
+      box-shadow: 0 0 10px gray; z-index: 1000;
+    }
+    #overlay {
+      display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.5); z-index: 999;
+    }
+  </style>
+</head>
+<body>
+  <h2>👥 Add & Manage Employees</h2>
+
+  <!-- Add Employee Form -->
+  <div>
+    <h3>Add New Employee</h3>
+    
+<input type="text" id="name" placeholder="Full Name" />
+<input type="email" id="email" placeholder="Email Address" />
+<input type="text" id="phone" placeholder="Phone Number" />
+<input type="text" id="position" placeholder="Position" />
+<input type="text" id="department" placeholder="Department" />
+<input type="text" id="role" placeholder="Role (e.g., HR, RM, Normal)" />
+<input type="number" id="salary" placeholder="Salary" />
+<input type="date" id="dateOfJoining" placeholder="Date of Joining" />
+<input type="text" id="status" placeholder="Status (Active/Inactive)" />
+<input type="text" id="location" placeholder="Address" />
+<input type="date" id="dob" placeholder="Date of Birth" />
+<input type="password" id="password" placeholder="Password" />
+<button onclick="addEmployee()">➕ Add Employee</button>
+<p id="message" style="color: green;"></p>
+
+  </div>
+
+  <!-- Employee Table -->
+  <div>
+    <h3>All Employees</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>Employee ID</th>
+          <th>Name</th>
+          <th>Department</th>
+          <th>Role</th>
+          <th>Location</th>
+        </tr>
+      </thead>
+      <tbody id="employeeTable"></tbody>
+    </table>
+  </div>
+
+  <!-- ✅ Edit Modal -->
+ <!-- 🧠 Enhanced Modal With Sidebar -->
+<div id="overlay" onclick="closeModal()"></div>
+<div id="editModal">
+  <div style="display: flex;">
+   
+
+
+    <div style="width: 30%; border-right: 1px solid #ccc; padding-right: 10px;">
+      <button onclick="showTab('role')">🛠 Role</button><br><br>
+      <button onclick="showTab('payroll')">💰 Payroll</button><br><br>
+      <div id="assignRMTab" style="display: none;">
+        <button onclick="showTab('assign')">🔀 Assign Under RM</button>
+      </div>
+    </div>
+    <div style="width: 70%; padding-left: 20px;">
+       <div id="detailsSection">
+  <h3>👤 Employee Details</h3>
+  <p><strong>ID:</strong> <span id="empDetailId"></span></p>
+  <p><strong>Name:</strong> <span id="empDetailName"></span></p>
+  <p><strong>Department:</strong> <span id="empDetailDepartment"></span></p>
+  <p><strong>Role:</strong> <span id="empDetailRole"></span></p>
+  <p><strong>Location:</strong> <span id="empDetailAddress"></span></p>
+  <p><strong>RM ID:</strong> <span id="empDetailManager"></span></p>
+</div>
+      <!-- Role Section -->
+      <div id="tab-role">
+        <h3>Change Role</h3>
+        <form onsubmit="submitEdit(event)">
+          <input type="hidden" id="editUserId" />
+          <label>Role:</label><br>
+          <select id="editRole">
+            <option value="Normal">Normal</option>
+            <option value="HR">HR</option>
+            <option value="RM">RM</option>
+          </select><br><br>
+          <button type="submit">✅ Update Role</button>
+        </form>
+      </div>
+
+      <!-- Payroll Section -->
+      <div id="tab-payroll" style="display: none;">
+        <h3>Payroll Management</h3>
+        <p>You can build payroll options here.</p>
+        <button onclick="window.open('payroll.html?userId=' + selectedUserId, '_blank')">➡️ Open Payroll</button>
+      </div>
+
+      <!-- Assign Section -->
+      <div id="tab-assign" style="display: none;">
+        <h3>Assign Under RM</h3>
+        <label>RM ID:</label><br>
+        <input type="text" id="editManagerId" placeholder="Manager User ID" /><br><br>
+        <button onclick="submitManagerAssign()">✅ Assign</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+  </div>
+
+  <script>
+    window.onload = () => fetchEmployees();
+ 
+function addEmployee() {
+  const employee = {
+    name: document.getElementById('name').value,
+    email: document.getElementById('email').value,
+    phone: document.getElementById('phone').value,
+    position: document.getElementById('position').value,
+    department: document.getElementById('department').value,
+    role: document.getElementById('role').value,
+    salary: parseFloat(document.getElementById('salary').value),
+    dateOfJoining: document.getElementById('dateOfJoining').value,
+    status: document.getElementById('status').value,
+    address: document.getElementById('location').value,
+    dob: document.getElementById('dob').value,
+    password: document.getElementById('password').value
+  };
+
+  fetch("http://localhost:8080/api/users", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(employee)
+  })
+  .then(res => res.ok ? res.json() : Promise.reject("Failed to add employee"))
+  .then(data => {
+    alert("✅ Employee added successfully!");
+    location.reload(); // ⬅️ This line reloads the page
+  })
+  .catch(err => alert("❌ " + err));
+}
+
+
+    function fetchEmployees() {
+      fetch("http://localhost:8080/api/users/employees")
+        .then(res => res.json())
+        .then(data => {
+          const table = document.getElementById("employeeTable");
+          table.innerHTML = "";
+          data.forEach(emp => {
+            table.innerHTML += `
+              <tr onclick="openEmployeeManager('${emp.id}', '${emp.role || ''}', '${emp.managerId || ''}')">
+                <td>${emp.id}</td>
+                <td>${emp.name}</td>
+                <td>${emp.department}</td>
+                <td>${emp.role}</td>
+                <td>${emp.address}</td>
+              </tr>`;
+          });
+        })
+        .catch(err => {
+          console.error("Failed to fetch employees:", err);
+        });
+    }
+
+   let selectedUserId = null;
+
+function openEmployeeManager(userId, currentRole = '', managerId = '') {
+  selectedUserId = userId;
+  document.getElementById("editUserId").value = userId;
+  document.getElementById("editRole").value = currentRole;
+  document.getElementById("editManagerId").value = managerId || "";
+
+  // Fetch full user details
+  fetch(`http://localhost:8080/api/users/${userId}`)
+    .then(res => res.json())
+    .then(user => {
+      // Show Assign RM tab only if RM
+      document.getElementById("assignRMTab").style.display = user.role === 'RM' ? "block" : "none";
+
+      // Fill employee details section
+      document.getElementById("empDetailId").innerText = user.id || '';
+      document.getElementById("empDetailName").innerText = user.name || '';
+      document.getElementById("empDetailDepartment").innerText = user.department || '';
+      document.getElementById("empDetailRole").innerText = user.role || '';
+      document.getElementById("empDetailAddress").innerText = user.address || '';
+      document.getElementById("empDetailManager").innerText = user.managerId || 'N/A';
+
+      // Open modal
+      showTab('role');
+      document.getElementById("overlay").style.display = "block";
+      document.getElementById("editModal").style.display = "block";
+    })
+    .catch(err => {
+      alert("❌ Failed to load user details");
+      console.error(err);
+    });
+}
+
+
+function closeModal() {
+  document.getElementById("overlay").style.display = "none";
+  document.getElementById("editModal").style.display = "none";
+}
+
+function showTab(tabName) {
+  document.getElementById("tab-role").style.display = tabName === 'role' ? 'block' : 'none';
+  document.getElementById("tab-payroll").style.display = tabName === 'payroll' ? 'block' : 'none';
+  document.getElementById("tab-assign").style.display = tabName === 'assign' ? 'block' : 'none';
+}
+
+function submitEdit(event) {
+  event.preventDefault();
+  const userId = document.getElementById("editUserId").value;
+  const updatedData = {
+    role: document.getElementById("editRole").value
+  };
+
+  fetch(`http://localhost:8080/api/users/${userId}`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(updatedData)
+  })
+    .then(res => res.ok ? res.json() : Promise.reject("Update failed"))
+    .then(() => {
+      alert("✅ Role updated");
+      closeModal();
+      fetchEmployees();
+    })
+    .catch(err => alert("❌ " + err));
+}
+
+function submitManagerAssign() {
+  const userId = document.getElementById("editUserId").value;
+  const managerId = document.getElementById("editManagerId").value;
+
+  fetch(`http://localhost:8080/api/users/${userId}`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ managerId })
+  })
+    .then(res => res.ok ? res.json() : Promise.reject("Assign failed"))
+    .then(() => {
+      alert("✅ Assigned under RM");
+      closeModal();
+      fetchEmployees();
+    })
+    .catch(err => alert("❌ " + err));
+}
+
+    
+  </script>
+</body>
+</html>

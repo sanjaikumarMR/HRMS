@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Employee Payroll</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; background: #f9f9f9; }
+    h2 { text-align: center; }
+    table { width: 100%; border-collapse: collapse; margin: 20px 0; background: #fff; }
+    th, td { padding: 10px; border: 1px solid #ccc; text-align: right; }
+    th { background: #f2f2f2; text-align: center; }
+    input { width: 100%; border: none; background: transparent; text-align: right; }
+    .section-title { background: #e0e0e0; font-weight: bold; }
+    .total { font-weight: bold; }
+    .center-button { text-align: center; margin-top: 20px; }
+    .employee-info { text-align: left; margin-top: 10px; }
+  </style>
+</head>
+<body>
+  <h2>💰 Payroll Summary</h2>
+  <div class="employee-info">
+    <p><strong>Employee ID:</strong> <span id="payrollUserId"></span></p>
+    <p><strong>Name:</strong> <span id="payrollName"></span></p>
+    <p><strong>Department:</strong> <span id="payrollDept"></span></p>
+  </div>
+
+  <form id="payrollForm">
+    <table>
+      <tr>
+        <th>Earnings</th>
+        <th>Amount (Rs.)</th>
+        <th>Deductions</th>
+        <th>Amount (Rs.)</th>
+      </tr>
+      <!-- Earnings/Deductions rows -->
+      <tr><td>Earned Basic Pay</td><td><input name="earnings[Earned Basic Pay]" /></td><td>Provident Fund</td><td><input name="deductions[Provident Fund]" /></td></tr>
+      <tr><td>Supplementary Basic</td><td><input name="earnings[Supplementary Basic]" /></td><td>Arrear Provident Fund</td><td><input name="deductions[Arrear Provident Fund]" /></td></tr>
+      <tr><td>Earned Other Allowance</td><td><input name="earnings[Earned Other Allowance]" /></td><td>TDS</td><td><input name="deductions[TDS]" /></td></tr>
+      <tr><td>Arrear</td><td><input name="earnings[Arrear]" /></td><td>Loan</td><td><input name="deductions[Loan]" /></td></tr>
+      <tr><td>Arrear Other Allowance</td><td><input name="earnings[Arrear Other Allowance]" /></td><td>Labour Welfare Fund</td><td><input name="deductions[Labour Welfare Fund]" /></td></tr>
+      <tr><td>Supplementary HRA</td><td><input name="earnings[Supplementary HRA]" /></td><td>Other Deductions</td><td><input name="deductions[Other Deductions]" /></td></tr>
+      <tr><td>Earned DA</td><td><input name="earnings[Earned DA]" /></td><td>Professional Tax Amount</td><td><input name="deductions[Professional Tax Amount]" /></td></tr>
+      <tr><td>Earned HRA</td><td><input name="earnings[Earned HRA]" /></td><td>PTAX Amount</td><td><input name="deductions[PTAX Amount]" /></td></tr>
+      <tr><td>Supplementary DA</td><td><input name="earnings[Supplementary DA]" /></td><td>Salary Advance</td><td><input name="deductions[Salary Advance]" /></td></tr>
+      <tr><td>Supplementary Other Allowance</td><td><input name="earnings[Supplementary Other Allowance]" /></td><td>Mobile device</td><td><input name="deductions[Mobile device]" /></td></tr>
+      <tr><td>Supplementary Medical Allowance</td><td><input name="earnings[Supplementary Medical Allowance]" /></td><td>CUG Telephone charges reimbursement</td><td><input name="deductions[CUG Telephone charges reimbursement]" /></td></tr>
+      <tr><td>Earned Medical Allowance</td><td><input name="earnings[Earned Medical Allowance]" /></td><td>Deduction towards dues to Company</td><td><input name="deductions[Deduction towards dues to Company]" /></td></tr>
+      <tr><td>Earned Variable Pay</td><td><input name="earnings[Earned Variable Pay]" /></td><td>Inventory adjustment not handed over</td><td><input name="deductions[Inventory adjustment not handed over]" /></td></tr>
+      <tr><td>Supplementary Fixed Variable Pay</td><td><input name="earnings[Supplementary Fixed Variable Pay]" /></td><td>Petty cash advance Deductions</td><td><input name="deductions[Petty cash advance Deductions]" /></td></tr>
+      <tr><td>Supplementary Fixed Travel Allowance</td><td><input name="earnings[Supplementary Fixed Travel Allowance]" /></td><td>Tour Expenses Deductions</td><td><input name="deductions[Tour Expenses Deductions]" /></td></tr>
+      <tr><td>Earned Travel Allowance</td><td><input name="earnings[Earned Travel Allowance]" /></td><td></td><td></td></tr>
+      <tr><td>Arrear Basic</td><td><input name="earnings[Arrear Basic]" /></td><td></td><td></td></tr>
+      <tr><td>Arrear DA</td><td><input name="earnings[Arrear DA]" /></td><td></td><td></td></tr>
+      <tr><td>Arrear HRA</td><td><input name="earnings[Arrear HRA]" /></td><td></td><td></td></tr>
+      <tr><td>Arrear Medical Allowance</td><td><input name="earnings[Arrear Medical Allowance]" /></td><td></td><td></td></tr>
+      <tr><td>Arrear Fixed Variable Pay</td><td><input name="earnings[Arrear Fixed Variable Pay]" /></td><td></td><td></td></tr>
+      <tr><td>Arrear Fixed Travel Allowance</td><td><input name="earnings[Arrear Fixed Travel Allowance]" /></td><td></td><td></td></tr>
+      <tr><td>Incentive</td><td><input name="earnings[Incentive]" /></td><td></td><td></td></tr>
+      <tr><td>Other Earnings</td><td><input name="earnings[Other Earnings]" /></td><td></td><td></td></tr>
+      <tr><td>Petty cash advance</td><td><input name="earnings[Petty cash advance]" /></td><td></td><td></td></tr>
+      <tr><td>Tour Expenses</td><td><input name="earnings[Tour Expenses]" /></td><td></td><td></td></tr>
+      <tr class="section-title">
+        <td>Gross Total</td><td class="total"><input name="grossTotal" /></td>
+        <td>Deduction Total</td><td class="total"><input name="deductionTotal" /></td>
+      </tr>
+      <tr class="section-title">
+        <td colspan="2">Net Pay</td>
+        <td colspan="2" class="total"><input name="netPay" /></td>
+      </tr>
+      <tr><td colspan="4" style="text-align: center;"><strong>In Words:</strong> <input name="netPayWords" style="width: 90%; text-align: center;"></td></tr>
+    </table>
+  </form>
+
+  <div class="center-button">
+    <button onclick="submitPayroll()">📤 Submit Payroll</button>
+    <button onclick="generatePayslip()">📄 Generate Payslip</button>
+  </div>
+
+<script>
+  const currentUserId = new URLSearchParams(window.location.search).get("userId");
+  document.getElementById("payrollUserId").textContent = currentUserId;
+
+  fetch(`http://localhost:8080/api/users/${currentUserId}`)
+    .then(res => res.json())
+    .then(user => {
+      document.getElementById("payrollName").textContent = user.name;
+      document.getElementById("payrollDept").textContent = user.department;
+    })
+    .catch(err => console.error("Error fetching user info:", err));
+
+  function collectPayrollData() {
+    const rows = document.querySelectorAll("table tr");
+    const earnings = {}, deductions = {};
+
+    rows.forEach(row => {
+      const cells = row.querySelectorAll("td");
+      if (cells.length === 4) {
+        const earnKey = cells[0].innerText.trim();
+        const earnVal = cells[1].querySelector("input")?.value || "0";
+        const dedKey = cells[2].innerText.trim();
+        const dedVal = cells[3].querySelector("input")?.value || "0";
+        if (earnKey) earnings[earnKey] = parseFloat(earnVal);
+        if (dedKey) deductions[dedKey] = parseFloat(dedVal);
+      }
+    });
+
+    const netPay = parseFloat(document.querySelector("input[name='netPay']")?.value || "0");
+
+    return {
+      userId: currentUserId,
+      month: new Date().toISOString().slice(0, 7),
+      earnings,
+      deductions,
+      netPay
+    };
+  }
+
+  function submitPayroll() {
+    const payload = collectPayrollData();
+    fetch("http://localhost:8080/api/payroll/save", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    })
+      .then(res => res.ok ? res.text() : Promise.reject("Failed to save payroll"))
+      .then(msg => alert("✅ Payroll saved: " + msg))
+      .catch(err => alert("❌ Error: " + err));
+  }
+
+  function generatePayslip() {
+    if (!currentUserId) return alert("❌ No user ID found in URL.");
+    const month = new Date().toISOString().slice(0, 7);
+    window.open(`http://localhost:8080/api/payroll/payslip/${currentUserId}?month=${month}`, "_blank");
+  }
+</script>
+</body>
+</html>

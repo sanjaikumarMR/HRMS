@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Geo + Face Attendance</title>
+  <script defer src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
+  <style>
+    video, canvas { display: block; margin: 10px auto; }
+    #result { text-align: center; font-weight: bold; margin-top: 20px; }
+  </style>
+</head>
+<body>
+  <h2 style="text-align:center">📍🧠 Geo + Face Attendance</h2>
+  <video id="video" width="320" height="240" autoplay muted></video>
+  <canvas id="canvas" width="320" height="240"></canvas>
+  <div style="text-align:center">
+    <button onclick="verifyAndMark()">✅ Verify & Mark Attendance</button>
+  </div>
+  <p id="result"></p>
+
+<script>
+  const video = document.getElementById('video');
+  const canvas = document.getElementById('canvas');
+  const resultBox = document.getElementById('result');
+  const ctx = canvas.getContext('2d');
+
+  const officeLat = 13.0061013;
+  const officeLng = 80.2040870;
+  const allowedRadius = 100000; // meters
+
+  // Load face-api.js models
+  window.addEventListener('load', async () => {
+    try {
+      await Promise.all([
+        faceapi.nets.tinyFaceDetector.loadFromUri('models'),
+        faceapi.nets.faceRecognitionNet.loadFromUri('models'),
+        faceapi.nets.faceLandmark68Net.loadFromUri('models')
+      ]);
+      startVideo();
+    } catch (e) {
+      console.error("Error loading models:", e);
+    }
+  });
+
+  function startVideo() {
+    navigator.mediaDevices.getUserMedia({ video: true })
+      .then(stream => video.srcObject = stream)
+      .catch(err => console.error('Camera error:', err));
+  }
+
+  async function verifyAndMark() {
+    const userId = localStorage.getItem("userId");
+    if (!userId) return alert("User not logged in");
+
+    navigator.geolocation.getCurrentPosition(async pos => {
+      const lat = pos.coords.latitude;
+      const lng = pos.coords.longitude;
+      const dist = getDistance(lat, lng, officeLat, officeLng);
+
+      if (dist > allowedRadius) {
+        return resultBox.innerText = "❌ Not within office radius";
+      }
+
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+      const captured = await faceapi.detectSingleFace(canvas, new faceapi.TinyFaceDetectorOptions())
+        .withFaceLandmarks()
+        .withFaceDescriptor();
+
+      if (!captured) return resultBox.innerText = "❌ Face not detected";
+
+      try {
+        const refRes = await fetch(`http://localhost:8080/api/face/${userId}`);
+        const refData = await refRes.json();
+        const refDescriptor = new Float32Array(Object.values(refData));
+        const distance = faceapi.euclideanDistance(captured.descriptor, refDescriptor);
+
+        if (distance < 0.6) {
+          markAttendance(userId, lat, lng);
+        } else {
+          resultBox.innerText = "❌ Face not recognized";
+        }
+      } catch (e) {
+        console.error("Face descriptor fetch error:", e);
+        resultBox.innerText = "❌ Face match failed";
+      }
+    }, () => {
+      resultBox.innerText = "❌ Location access denied";
+    });
+  }
+
+  function markAttendance(userId, lat, lng) {
+    fetch('http://localhost:8080/api/attendance', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        userId, latitude: lat, longitude: lng, status: "Present"
+      })
+    })
+    .then(res => res.ok
+      ? resultBox.innerText = "✅ Attendance marked"
+      : resultBox.innerText = "❌ Failed to mark attendance")
+    .catch(() => resultBox.innerText = "❌ Server error");
+  }
+
+  function getDistance(lat1, lon1, lat2, lon2) {
+    const R = 6371e3;
+    const toRad = x => x * Math.PI / 180;
+    const dLat = toRad(lat2 - lat1);
+    const dLon = toRad(lon2 - lon1);
+    const a = Math.sin(dLat / 2) ** 2 +
+              Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) *
+              Math.sin(dLon / 2) ** 2;
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return R * c;
+  }
+</script>
+</body>
+</html>

@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>HR Dashboard - HRMS</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      display: flex;
+      height: 100vh;
+    }
+
+    .sidebar {
+      width: 260px;
+      background-color: #2c3e50;
+      color: white;
+      padding: 20px;
+      overflow-y: auto;
+    }
+
+    .sidebar h2 {
+      color: #ecf0f1;
+      margin-bottom: 20px;
+    }
+
+    .sidebar a {
+      display: block;
+      color: #ecf0f1;
+      text-decoration: none;
+      padding: 10px 0;
+      border-bottom: 1px solid #34495e;
+    }
+
+    .sidebar a:hover {
+      background-color: #34495e;
+      padding-left: 10px;
+    }
+
+    .main-content {
+      flex: 1;
+      padding: 30px;
+      overflow-y: auto;
+      background-color: #ecf0f1;
+    }
+
+    .main-content h1 {
+      margin-top: 0;
+    }
+
+    .nested {
+      margin-left: 20px;
+      font-size: 0.95em;
+    }
+
+    .highlight {
+      background-color: #dff9fb;
+      padding: 10px;
+      border-radius: 6px;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="sidebar">
+    <h2>👩‍💼 HR Dashboard</h2>
+    <a href="../attendance.html">📍 Attendance (Geo-tracking)</a>
+    <a href="/frontend/register-face.html">🧠 Register Face</a>
+
+    <a href="../attendance-history.html">📅 Attendance History</a>
+    <a href="../payslip.html">💰 Generate Payslip</a>
+    <a href="#">🔍 Filter Panel (Business Line & Region)</a>
+    
+    <a href="#">🌳 View Employee Tree</a>
+    
+ <a href="add-manage-employee.html">➕ Add / Manage Employees</a>
+  <a href="attendance-history.html">📅 View Attendance History</a>
+  <a href="leave-approvals.html">📝 View & Approve Leave</a>
+  <a href="travel-approvals.html">✈️ Approve Travel Requests</a>
+  <a href="performance.html">📈 Performance Review Submission</a>
+  <a href="payroll.html">💰 Manage Payroll</a>
+  <a href="departments.html">🏢 Manage Departments</a>
+  <a href="policies.html">📚 View Policies</a>
+  </div>
+
+  <div class="main-content">
+    <h1>Welcome, HR!</h1>
+    <p>This dashboard provides tools to manage employee data, approvals, and department-level insights. Use the navigation menu to access each module.</p>
+  <div id="employee-panel" style="display: none;">
+  <h2>👥 Employee Filter Panel</h2>
+  <input type="text" id="employeeSearch" placeholder="Search by name or ID" onkeyup="filterEmployees()" />
+  <table border="1" style="width: 100%; border-collapse: collapse;" id="employeeTable">
+    <thead>
+      <tr>
+        <th>ID</th><th>Name</th><th>Department</th><th>Role</th><th>Action</th>
+      </tr>
+    </thead>
+    <tbody id="employeeBody"></tbody>
+  </table>
+</div>
+</div>
+<script>
+  async function showEmployeePanel() {
+    document.getElementById('employee-panel').style.display = 'block';
+    const res = await fetch('http://localhost:8080/api/users');
+    const users = await res.json();
+
+    const body = document.getElementById('employeeBody');
+    body.innerHTML = '';
+
+    users.forEach(user => {
+      const row = document.createElement('tr');
+      row.innerHTML = `
+        <td>${user.id}</td>
+        <td>${user.name}</td>
+        <td>${user.department}</td>
+        <td>${user.role}</td>
+        <td><button onclick="viewEmployeeModules('${user.id}', '${user.name}')">View</button></td>
+      `;
+      body.appendChild(row);
+    });
+  }
+
+  function filterEmployees() {
+    const input = document.getElementById('employeeSearch').value.toLowerCase();
+    const rows = document.querySelectorAll('#employeeTable tbody tr');
+    rows.forEach(row => {
+      const text = row.textContent.toLowerCase();
+      row.style.display = text.includes(input) ? '' : 'none';
+    });
+  }
+
+  function viewEmployeeModules(empId, empName) {
+    const modulesHTML = `
+      <h3>📄 Modules for ${empName} (${empId})</h3>
+      <ul>
+        <li><a href="attendance-history.html?empId=${empId}">📍 Attendance Summary</a></li>
+        <li><a href="leave-records.html?empId=${empId}">📝 Leave Records</a></li>
+        <li><a href="payroll-history.html?empId=${empId}">💸 Payroll History</a></li>
+        <li><a href="performance.html?empId=${empId}">📈 Performance Reviews</a></li>
+        <li><a href="travel-records.html?empId=${empId}">✈️ Travel Request History</a></li>
+      </ul>
+    `;
+    const detailRow = document.createElement('tr');
+    detailRow.innerHTML = `<td colspan="5">${modulesHTML}</td>`;
+    const table = document.getElementById('employeeBody');
+    table.appendChild(detailRow);
+  }
+</script>
+
+
+</body>
+</html>

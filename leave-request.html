@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Apply for Leave</title>
+</head>
+<body>
+  <h2>Leave Request</h2>
+  <form id="leaveForm">
+    <label>Start Date: <input type="date" name="startDate" required /></label><br/>
+    <label>End Date: <input type="date" name="endDate" required /></label><br/>
+    <label>Reason: <textarea name="reason" required></textarea></label><br/>
+    <button type="submit">Submit Leave Request</button>
+  </form>
+
+  <script>
+    document.getElementById("leaveForm").addEventListener("submit", function(e) {
+      e.preventDefault();
+      alert("Leave request submitted! (connect to backend)");
+    });
+  </script>
+</body>
+</html>

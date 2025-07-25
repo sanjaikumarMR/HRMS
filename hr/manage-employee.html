@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Manage Employee</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; }
+    button, input, select { margin: 5px 0; padding: 8px; width: 100%; }
+
+    #overlay {
+      display: none;
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      z-index: 999;
+    }
+
+    #editModal {
+      display: none;
+      position: fixed;
+      top: 20%;
+      left: 30%;
+      width: 40%;
+      background: #fff;
+      padding: 20px;
+      box-shadow: 0 0 10px gray;
+      z-index: 1000;
+    }
+  </style>
+</head>
+<body>
+  <h2>👤 Manage Employee</h2>
+  <div id="userDetails">Loading...</div>
+
+  <!-- Overlay & Modal -->
+  <div id="overlay" onclick="closeModal()"></div>
+  <div id="editModal">
+    <h3>🛠 Manage Role & RM</h3>
+    <form onsubmit="submitEdit(event)">
+      <input type="hidden" id="editUserId" />
+
+      <label>Role:</label>
+      <select id="editRole">
+        <option value="Normal">Normal</option>
+        <option value="HR">HR</option>
+        <option value="RM">RM</option>
+      </select><br><br>
+
+      <label>Assign under RM (Optional):</label>
+      <input type="text" id="editManagerId" placeholder="Manager User ID" /><br><br>
+
+      <button type="submit">✅ Update</button>
+      <button type="button" onclick="closeModal()">❌ Cancel</button>
+    </form>
+  </div>
+
+  <script>
+    const userId = new URLSearchParams(window.location.search).get('userId');
+    let currentUser = null;
+
+    fetch(`http://localhost:8080/api/users/${userId}`)
+      .then(res => res.json())
+      .then(user => {
+        currentUser = user;
+        document.getElementById('userDetails').innerHTML = `
+          <p><strong>Name:</strong> ${user.name}</p>
+          <p><strong>Department:</strong> ${user.department}</p>
+          <p><strong>Role:</strong> ${user.role}</p>
+          <p><strong>Address:</strong> ${user.address}</p>
+
+          <button onclick="showModal()">✏️ Edit Role / RM</button>
+          <button onclick="openPayroll('${user.id}')">💰 Manage Payroll</button>
+        `;
+        document.getElementById("editUserId").value = user.id;
+        document.getElementById("editRole").value = user.role;
+        document.getElementById("editManagerId").value = user.managerId || "";
+      })
+      .catch(err => {
+        document.getElementById('userDetails').innerText = "❌ Failed to load user.";
+        console.error(err);
+      });
+
+    function showModal() {
+      document.getElementById('overlay').style.display = "block";
+      document.getElementById('editModal').style.display = "block";
+    }
+
+    function closeModal() {
+      document.getElementById('overlay').style.display = "none";
+      document.getElementById('editModal').style.display = "none";
+    }
+
+    function submitEdit(e) {
+      e.preventDefault();
+      const role = document.getElementById("editRole").value;
+      const managerId = document.getElementById("editManagerId").value;
+      const userId = document.getElementById("editUserId").value;
+
+      fetch(`http://localhost:8080/api/users/${userId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ role, managerId })
+      })
+      .then(res => res.json())
+      .then(() => {
+        alert("✅ Updated successfully");
+        location.reload();
+      })
+      .catch(() => alert("❌ Failed to update user"));
+    }
+
+    function openPayroll(userId) {
+      window.open(`payroll.html?userId=${userId}`, '_blank');
+    }
+  </script>
+</body>
+</html>

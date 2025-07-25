@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Apply for Travel Request</title>
+</head>
+<body>
+  <h2>Travel Request</h2>
+  <form id="travelForm">
+    <label>Destination: <input type="text" name="destination" required /></label><br/>
+    <label>Purpose: <input type="text" name="purpose" required /></label><br/>
+    <label>Start Date: <input type="date" name="startDate" required /></label><br/>
+    <label>End Date: <input type="date" name="endDate" required /></label><br/>
+    <button type="submit">Submit Travel Request</button>
+  </form>
+
+  <script>
+    document.getElementById("travelForm").addEventListener("submit", function(e) {
+      e.preventDefault();
+      alert("Travel request submitted! (connect to backend)");
+    });
+  </script>
+</body>
+</html>
