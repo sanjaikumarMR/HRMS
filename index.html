@@ -94,6 +94,12 @@
       <input type="password" id="password" placeholder="Password" required />
       <button type="submit">Login</button>
     </form>
+
+    <div id="loadingMessage" style="display:none; color: blue; font-weight: bold; margin-top: 10px;">
+  Logging in, please wait...
+</div>
+
+    
     <div id="loginError" class="error"></div>
   </div>
 
@@ -103,7 +109,8 @@
 
   const id = document.getElementById('id').value;
   const password = document.getElementById('password').value;
-  
+      
+  document.getElementById('loadingMessage').style.display = 'block';
 
   try {
     const res = await fetch('https://hrms-backend-2wks.onrender.com/api/users/login', {
@@ -138,8 +145,10 @@
       document.getElementById('loginError').textContent = 'Invalid ID or password.';
     } 
   } catch (err) {
+    document.getElementById('loadingMessage').style.display = 'none';
     console.error('Login error:', err);
     document.getElementById('loginError').textContent = 'Server error. Try again.';
+    
   }
   
 });
